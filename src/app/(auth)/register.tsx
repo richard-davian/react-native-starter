@@ -1,61 +1,30 @@
+import { AppButton } from "@/components/app-button";
+import { FormTextInput } from "@/components/form-text-input";
 import { useAuth } from "@/context/auth";
 import { registerSchema, type RegisterInput } from "@/services/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link } from "expo-router";
 import { useState } from "react";
-import { Controller, useForm, type Control } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import {
-  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
-  Pressable,
   ScrollView,
   StyleSheet,
-  Text,
-  TextInput,
-  type TextInputProps,
+  View,
 } from "react-native";
+import { HelperText, Text, useTheme } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-// Field reusable: mengurangi pengulangan Controller
-function Field({
-  control,
-  name,
-  error,
-  ...inputProps
-}: {
-  control: Control<RegisterInput>;
-  name: keyof RegisterInput;
-  error?: string;
-} & TextInputProps) {
-  return (
-    <>
-      <Controller
-        control={control}
-        name={name}
-        render={({ field: { value, onChange, onBlur } }) => (
-          <TextInput
-            style={[styles.input, error && styles.inputError]}
-            value={value}
-            onChangeText={onChange}
-            onBlur={onBlur}
-            autoCapitalize="none"
-            {...inputProps}
-          />
-        )}
-      />
-      {error && <Text style={styles.error}>{error}</Text>}
-    </>
-  );
-}
-
 export default function Register() {
+  const theme = useTheme();
   const { signUp } = useAuth();
   const [serverError, setServerError] = useState<string | null>(null);
 
   const {
     control,
     handleSubmit,
+    setFocus,
     formState: { errors, isSubmitting },
   } = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
@@ -72,7 +41,9 @@ export default function Register() {
   });
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView
+      style={[styles.flex, { backgroundColor: theme.colors.background }]}
+    >
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -81,57 +52,83 @@ export default function Register() {
           contentContainerStyle={styles.container}
           keyboardShouldPersistTaps="handled"
         >
-          <Text style={styles.title}>Daftar</Text>
+          <View style={styles.header}>
+            <Text variant="headlineLarge" style={styles.bold}>
+              Buat akun
+            </Text>
+            <Text
+              variant="bodyMedium"
+              style={{ color: theme.colors.onSurfaceVariant }}
+            >
+              Isi data di bawah untuk mendaftar
+            </Text>
+          </View>
 
-          <Field
+          <FormTextInput
             control={control}
             name="name"
-            placeholder="Nama"
+            label="Nama"
+            icon="account-outline"
             autoCapitalize="words"
+            returnKeyType="next"
+            onSubmitEditing={() => setFocus("email")}
             error={errors.name?.message}
           />
-          <Field
+          <FormTextInput
             control={control}
             name="email"
-            placeholder="Email"
+            label="Email"
+            icon="email-outline"
             keyboardType="email-address"
             autoComplete="email"
+            returnKeyType="next"
+            onSubmitEditing={() => setFocus("password")}
             error={errors.email?.message}
           />
-          <Field
+          <FormTextInput
             control={control}
             name="password"
-            placeholder="Password"
+            label="Password"
+            icon="lock-outline"
             secureTextEntry
+            returnKeyType="next"
+            onSubmitEditing={() => setFocus("confirmPassword")}
             error={errors.password?.message}
           />
-          <Field
+          <FormTextInput
             control={control}
             name="confirmPassword"
-            placeholder="Konfirmasi password"
+            label="Konfirmasi password"
+            icon="lock-check-outline"
             secureTextEntry
-            onSubmitEditing={onSubmit}
             returnKeyType="done"
+            onSubmitEditing={onSubmit}
             error={errors.confirmPassword?.message}
           />
 
-          {serverError && <Text style={styles.error}>{serverError}</Text>}
+          <HelperText type="error" visible={!!serverError}>
+            {serverError}
+          </HelperText>
 
-          <Pressable
-            style={[styles.button, isSubmitting && styles.disabled]}
+          <AppButton
             onPress={onSubmit}
+            loading={isSubmitting}
             disabled={isSubmitting}
           >
-            {isSubmitting ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={styles.buttonText}>Daftar</Text>
-            )}
-          </Pressable>
+            Daftar
+          </AppButton>
 
-          <Link href="/login" style={styles.link}>
-            Sudah punya akun? Masuk
-          </Link>
+          <View style={styles.footer}>
+            <Text style={{ color: theme.colors.onSurfaceVariant }}>
+              Sudah punya akun?{" "}
+            </Text>
+            <Link
+              href="/login"
+              style={{ color: theme.colors.primary, fontWeight: "700" }}
+            >
+              Masuk
+            </Link>
+          </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -139,27 +136,9 @@ export default function Register() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1 },
   flex: { flex: 1 },
-  container: { flexGrow: 1, justifyContent: "center", padding: 24, gap: 12 },
-  title: { fontSize: 28, fontWeight: "700", marginBottom: 8 },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    height: 48,
-  },
-  inputError: { borderColor: "#dc2626" },
-  error: { color: "#dc2626", fontSize: 13 },
-  button: {
-    backgroundColor: "#2563eb",
-    height: 48,
-    borderRadius: 8,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  disabled: { opacity: 0.6 },
-  buttonText: { color: "#fff", fontWeight: "600", fontSize: 16 },
-  link: { textAlign: "center", color: "#2563eb", marginTop: 8 },
+  container: { flexGrow: 1, justifyContent: "center", padding: 24, gap: 4 },
+  header: { gap: 4, marginBottom: 20 },
+  bold: { fontWeight: "800" },
+  footer: { flexDirection: "row", justifyContent: "center", marginTop: 16 },
 });

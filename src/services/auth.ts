@@ -60,3 +60,24 @@ export async function register(input: RegisterInput): Promise<AuthResult> {
     body: JSON.stringify(payload),
   });
 }
+
+// ---------- Forgot password ----------
+export const forgotPasswordSchema = z.object({
+  email: z.string().trim().email("Email tidak valid"),
+});
+export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
+
+export async function forgotPassword(
+  input: ForgotPasswordInput,
+): Promise<void> {
+  // Mode mock selama backend belum ada
+  if (!process.env.EXPO_PUBLIC_API_URL) {
+    await new Promise((r) => setTimeout(r, 600));
+    return;
+  }
+  // Sesuaikan path dengan backend klien
+  await api<void>("/auth/forgot-password", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}

@@ -1,10 +1,19 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
+import { Text, useTheme } from "react-native-paper";
 
 export default function Home() {
+  const theme = useTheme();
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Selamat datang 👋</Text>
-      <Text style={styles.subtitle}>Konten beranda ditaruh di sini.</Text>
+    <View
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+    >
+      <Text variant="headlineSmall" style={styles.bold}>
+        Selamat datang 👋
+      </Text>
+      <Text style={{ color: theme.colors.onSurfaceVariant }}>
+        Konten beranda ditaruh di sini.
+      </Text>
     </View>
   );
 }
@@ -17,6 +26,5 @@ const styles = StyleSheet.create({
     gap: 8,
     padding: 24,
   },
-  title: { fontSize: 24, fontWeight: "700" },
-  subtitle: { color: "#6b7280" },
+  bold: { fontWeight: "700" },
 });
