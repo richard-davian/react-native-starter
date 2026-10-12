@@ -1,7 +1,6 @@
 import type { ComponentProps } from "react";
 import { Button } from "react-native-paper";
 
-// Default gaya tombol. Layar cukup panggil <AppButton>.
 export function AppButton(props: ComponentProps<typeof Button>) {
   return (
     <Button

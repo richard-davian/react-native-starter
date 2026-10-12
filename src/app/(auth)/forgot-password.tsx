@@ -1,4 +1,6 @@
 import { AppButton } from "@/components/app-button";
+import { AuthFooter } from "@/components/auth-footer";
+import { AuthScreen } from "@/components/auth-screen";
 import { FormTextInput } from "@/components/form-text-input";
 import {
   forgotPassword,
@@ -6,21 +8,11 @@ import {
   type ForgotPasswordInput,
 } from "@/services/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link } from "expo-router";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import {
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  View,
-} from "react-native";
-import { HelperText, Text, useTheme } from "react-native-paper";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { HelperText } from "react-native-paper";
 
 export default function ForgotPassword() {
-  const theme = useTheme();
   const [serverError, setServerError] = useState<string | null>(null);
   const [sentTo, setSentTo] = useState<string | null>(null);
 
@@ -39,95 +31,49 @@ export default function ForgotPassword() {
       await forgotPassword(values);
       setSentTo(values.email);
     } catch (e) {
-      setServerError(e instanceof Error ? e.message : "Terjadi kesalahan");
+      setServerError(e instanceof Error ? e.message : "Something went wrong");
     }
   });
 
   return (
-    <SafeAreaView
-      style={[styles.flex, { backgroundColor: theme.colors.background }]}
+    <AuthScreen
+      title={sentTo ? "Check your email" : "Forgot password?"}
+      description={
+        sentTo
+          ? `If ${sentTo} is registered, we've sent a link to reset your password.`
+          : "Enter your account email and we'll send you a link to reset your password."
+      }
+      footer={<AuthFooter linkLabel="Back to sign in" href="/login" />}
     >
-      <KeyboardAvoidingView
-        style={styles.flex}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-      >
-        <ScrollView
-          contentContainerStyle={styles.container}
-          keyboardShouldPersistTaps="handled"
-        >
-          {sentTo ? (
-            // Tampilan sukses
-            <View style={styles.header}>
-              <Text variant="headlineLarge" style={styles.bold}>
-                Cek email kamu
-              </Text>
-              <Text
-                variant="bodyMedium"
-                style={{ color: theme.colors.onSurfaceVariant }}
-              >
-                Jika {sentTo} terdaftar, kami telah mengirim tautan untuk
-                mengatur ulang password.
-              </Text>
-            </View>
-          ) : (
-            <>
-              <View style={styles.header}>
-                <Text variant="headlineLarge" style={styles.bold}>
-                  Lupa password?
-                </Text>
-                <Text
-                  variant="bodyMedium"
-                  style={{ color: theme.colors.onSurfaceVariant }}
-                >
-                  Masukkan email akunmu, kami kirim tautan untuk mengatur ulang
-                  password.
-                </Text>
-              </View>
+      {!sentTo && (
+        <>
+          <FormTextInput
+            control={control}
+            name="email"
+            label="Email"
+            icon="email-outline"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoComplete="email"
+            textContentType="emailAddress"
+            returnKeyType="done"
+            onSubmitEditing={onSubmit}
+            error={errors.email?.message}
+          />
 
-              <FormTextInput
-                control={control}
-                name="email"
-                label="Email"
-                icon="email-outline"
-                keyboardType="email-address"
-                autoComplete="email"
-                returnKeyType="done"
-                onSubmitEditing={onSubmit}
-                error={errors.email?.message}
-              />
+          <HelperText type="error" visible={!!serverError}>
+            {serverError}
+          </HelperText>
 
-              <HelperText type="error" visible={!!serverError}>
-                {serverError}
-              </HelperText>
-
-              <AppButton
-                onPress={onSubmit}
-                loading={isSubmitting}
-                disabled={isSubmitting}
-              >
-                Kirim tautan
-              </AppButton>
-            </>
-          )}
-
-          <View style={styles.footer}>
-            <Link
-              href="/login"
-              style={{ color: theme.colors.primary, fontWeight: "700" }}
-            >
-              Kembali ke login
-            </Link>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+          <AppButton
+            onPress={onSubmit}
+            loading={isSubmitting}
+            disabled={isSubmitting}
+          >
+            Send reset link
+          </AppButton>
+        </>
+      )}
+    </AuthScreen>
   );
 }
-
-const styles = StyleSheet.create({
-  flex: { flex: 1 },
-  container: { flexGrow: 1, justifyContent: "center", padding: 24, gap: 4 },
-  header: { gap: 4, marginBottom: 20 },
-  bold: { fontWeight: "800" },
-  footer: { flexDirection: "row", justifyContent: "center", marginTop: 16 },
-});

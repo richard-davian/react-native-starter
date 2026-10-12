@@ -1,23 +1,15 @@
 import { AppButton } from "@/components/app-button";
+import { AuthFooter } from "@/components/auth-footer";
+import { AuthScreen } from "@/components/auth-screen";
 import { FormTextInput } from "@/components/form-text-input";
 import { useAuth } from "@/context/auth";
 import { registerSchema, type RegisterInput } from "@/services/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link } from "expo-router";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import {
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  View,
-} from "react-native";
-import { HelperText, Text, useTheme } from "react-native-paper";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { HelperText } from "react-native-paper";
 
 export default function Register() {
-  const theme = useTheme();
   const { signUp } = useAuth();
   const [serverError, setServerError] = useState<string | null>(null);
 
@@ -34,111 +26,84 @@ export default function Register() {
   const onSubmit = handleSubmit(async (values) => {
     setServerError(null);
     try {
-      await signUp(values); // sukses -> guard otomatis pindah ke (app)
+      await signUp(values);
     } catch (e) {
-      setServerError(e instanceof Error ? e.message : "Terjadi kesalahan");
+      setServerError(e instanceof Error ? e.message : "Something went wrong");
     }
   });
 
   return (
-    <SafeAreaView
-      style={[styles.flex, { backgroundColor: theme.colors.background }]}
+    <AuthScreen
+      title="Create account"
+      footer={
+        <AuthFooter
+          text="Already have an account?"
+          linkLabel="Sign in"
+          href="/login"
+        />
+      }
     >
-      <KeyboardAvoidingView
-        style={styles.flex}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      <FormTextInput
+        control={control}
+        name="name"
+        label="Name"
+        icon="account-outline"
+        autoCapitalize="words"
+        autoComplete="name"
+        textContentType="name"
+        returnKeyType="next"
+        onSubmitEditing={() => setFocus("email")}
+        error={errors.name?.message}
+      />
+      <FormTextInput
+        control={control}
+        name="email"
+        label="Email"
+        icon="email-outline"
+        keyboardType="email-address"
+        autoCapitalize="none"
+        autoComplete="email"
+        textContentType="emailAddress"
+        returnKeyType="next"
+        onSubmitEditing={() => setFocus("password")}
+        error={errors.email?.message}
+      />
+      <FormTextInput
+        control={control}
+        name="password"
+        label="Password"
+        icon="lock-outline"
+        secureTextEntry
+        autoComplete="new-password"
+        textContentType="newPassword"
+        returnKeyType="next"
+        onSubmitEditing={() => setFocus("confirmPassword")}
+        error={errors.password?.message}
+      />
+      <FormTextInput
+        control={control}
+        name="confirmPassword"
+        label="Confirm password"
+        icon="lock-check-outline"
+        secureTextEntry
+        autoComplete="new-password"
+        textContentType="newPassword"
+        returnKeyType="done"
+        onSubmitEditing={onSubmit}
+        error={errors.confirmPassword?.message}
+      />
+
+      <HelperText type="error" visible={!!serverError}>
+        {serverError}
+      </HelperText>
+
+      <AppButton
+        onPress={onSubmit}
+        loading={isSubmitting}
+        disabled={isSubmitting}
       >
-        <ScrollView
-          contentContainerStyle={styles.container}
-          keyboardShouldPersistTaps="handled"
-        >
-          <View style={styles.header}>
-            <Text variant="headlineLarge" style={styles.bold}>
-              Buat akun
-            </Text>
-            <Text
-              variant="bodyMedium"
-              style={{ color: theme.colors.onSurfaceVariant }}
-            >
-              Isi data di bawah untuk mendaftar
-            </Text>
-          </View>
-
-          <FormTextInput
-            control={control}
-            name="name"
-            label="Nama"
-            icon="account-outline"
-            autoCapitalize="words"
-            returnKeyType="next"
-            onSubmitEditing={() => setFocus("email")}
-            error={errors.name?.message}
-          />
-          <FormTextInput
-            control={control}
-            name="email"
-            label="Email"
-            icon="email-outline"
-            keyboardType="email-address"
-            autoComplete="email"
-            returnKeyType="next"
-            onSubmitEditing={() => setFocus("password")}
-            error={errors.email?.message}
-          />
-          <FormTextInput
-            control={control}
-            name="password"
-            label="Password"
-            icon="lock-outline"
-            secureTextEntry
-            returnKeyType="next"
-            onSubmitEditing={() => setFocus("confirmPassword")}
-            error={errors.password?.message}
-          />
-          <FormTextInput
-            control={control}
-            name="confirmPassword"
-            label="Konfirmasi password"
-            icon="lock-check-outline"
-            secureTextEntry
-            returnKeyType="done"
-            onSubmitEditing={onSubmit}
-            error={errors.confirmPassword?.message}
-          />
-
-          <HelperText type="error" visible={!!serverError}>
-            {serverError}
-          </HelperText>
-
-          <AppButton
-            onPress={onSubmit}
-            loading={isSubmitting}
-            disabled={isSubmitting}
-          >
-            Daftar
-          </AppButton>
-
-          <View style={styles.footer}>
-            <Text style={{ color: theme.colors.onSurfaceVariant }}>
-              Sudah punya akun?{" "}
-            </Text>
-            <Link
-              href="/login"
-              style={{ color: theme.colors.primary, fontWeight: "700" }}
-            >
-              Masuk
-            </Link>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+        Create account
+      </AppButton>
+    </AuthScreen>
   );
 }
-
-const styles = StyleSheet.create({
-  flex: { flex: 1 },
-  container: { flexGrow: 1, justifyContent: "center", padding: 24, gap: 4 },
-  header: { gap: 4, marginBottom: 20 },
-  bold: { fontWeight: "800" },
-  footer: { flexDirection: "row", justifyContent: "center", marginTop: 16 },
-});

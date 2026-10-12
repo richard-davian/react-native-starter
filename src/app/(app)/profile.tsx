@@ -16,11 +16,10 @@ export default function Profile() {
   const theme = useTheme();
   const { user, signOut } = useAuth();
 
-  // Konfirmasi dulu supaya tidak logout tanpa sengaja
   const confirmLogout = () =>
-    Alert.alert("Logout", "Yakin ingin keluar?", [
-      { text: "Batal", style: "cancel" },
-      { text: "Keluar", style: "destructive", onPress: () => void signOut() },
+    Alert.alert("Log out", "Are you sure you want to log out?", [
+      { text: "Cancel", style: "cancel" },
+      { text: "Log out", style: "destructive", onPress: () => void signOut() },
     ]);
 
   return (

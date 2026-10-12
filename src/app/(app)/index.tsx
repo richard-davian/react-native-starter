@@ -9,10 +9,10 @@ export default function Home() {
       style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
       <Text variant="headlineSmall" style={styles.bold}>
-        Selamat datang 👋
+        Welcome 👋
       </Text>
       <Text style={{ color: theme.colors.onSurfaceVariant }}>
-        Konten beranda ditaruh di sini.
+        Home content goes here.
       </Text>
     </View>
   );

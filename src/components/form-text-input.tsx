@@ -14,10 +14,9 @@ type Props<T extends FieldValues> = Omit<
   control: Control<T>;
   name: Path<T>;
   error?: string;
-  icon?: string; // ikon kiri (MaterialCommunityIcons), mis. "email-outline"
+  icon?: string;
 };
 
-// Input + validasi react-hook-form + toggle password, dalam satu komponen
 export function FormTextInput<T extends FieldValues>({
   control,
   name,
@@ -35,7 +34,7 @@ export function FormTextInput<T extends FieldValues>({
         name={name}
         render={({ field: { value, onChange, onBlur, ref } }) => (
           <TextInput
-            ref={ref} // dibutuhkan agar setFocus() berfungsi
+            ref={ref}
             mode="outlined"
             value={(value as string) ?? ""}
             onChangeText={onChange}

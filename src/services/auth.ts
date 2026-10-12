@@ -7,8 +7,8 @@ export type AuthResult = { token: string; user: User };
 
 // ---------- Login ----------
 export const loginSchema = z.object({
-  email: z.string().trim().email("Email tidak valid"),
-  password: z.string().min(8, "Minimal 8 karakter"),
+  email: z.string().trim().email("Invalid email address"),
+  password: z.string().min(8, "Must be at least 8 characters"),
 });
 export type LoginInput = z.infer<typeof loginSchema>;
 
@@ -22,7 +22,7 @@ export async function login(input: LoginInput): Promise<AuthResult> {
         user: { id: "1", name: "Demo User", email: input.email },
       };
     }
-    throw new ApiError(401, "Email atau password salah");
+    throw new ApiError(401, "Incorrect email or password");
   }
   // Sesuaikan path & bentuk response dengan backend klien
   return api<AuthResult>("/auth/login", {
@@ -34,13 +34,13 @@ export async function login(input: LoginInput): Promise<AuthResult> {
 // ---------- Register ----------
 export const registerSchema = z
   .object({
-    name: z.string().trim().min(2, "Minimal 2 karakter"),
-    email: z.string().trim().email("Email tidak valid"),
-    password: z.string().min(8, "Minimal 8 karakter"),
+    name: z.string().trim().min(2, "Must be at least 2 characters"),
+    email: z.string().trim().email("Invalid email address"),
+    password: z.string().min(8, "Must be at least 8 characters"),
     confirmPassword: z.string(),
   })
   .refine((v) => v.password === v.confirmPassword, {
-    message: "Password tidak sama",
+    message: "Passwords do not match",
     path: ["confirmPassword"],
   });
 export type RegisterInput = z.infer<typeof registerSchema>;
@@ -63,7 +63,7 @@ export async function register(input: RegisterInput): Promise<AuthResult> {
 
 // ---------- Forgot password ----------
 export const forgotPasswordSchema = z.object({
-  email: z.string().trim().email("Email tidak valid"),
+  email: z.string().trim().email("Invalid email address"),
 });
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
 

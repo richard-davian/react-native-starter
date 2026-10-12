@@ -35,7 +35,7 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
 
   if (!res.ok) {
     const body = await res.json().catch(() => null);
-    throw new ApiError(res.status, body?.message ?? "Terjadi kesalahan");
+    throw new ApiError(res.status, body?.message ?? "Something went wrong");
   }
   return res.status === 204 ? (undefined as T) : res.json();
 }
